@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Membangun Istana di Surga - Puzzle Version</title>
+    <title>Game Membangun Istana di Surga - Responsive</title>
     <style>
         :root {
             --primary: #2d3436;
@@ -20,8 +20,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
         #game-container {
@@ -34,14 +34,15 @@
             align-items: center;
         }
 
-        h1 { color: #00695c; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); font-size: 2rem; margin: 5px 0; }
+        h1 { color: #00695c; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); font-size: calc(1.2rem + 1vw); margin: 10px 0; }
 
-        /* KANTONG LOGIC */
+        /* KANTONG LOGIC - RESPONSIVE LAYOUT */
         .game-layout {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
+            flex-wrap: wrap; /* Memungkinkan elemen turun ke bawah di HP */
+            gap: 15px;
             width: 100%;
         }
 
@@ -49,18 +50,19 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 5px;
+            order: 2; /* Default order */
         }
 
         .kantong {
-            width: 80px;
-            height: 200px;
-            border: 4px solid #fff;
-            border-radius: 0 0 40px 40px;
+            width: 60px;
+            height: 150px;
+            border: 3px solid #fff;
+            border-radius: 0 0 30px 30px;
             position: relative;
             background: rgba(255,255,255,0.3);
             overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         .isi-kantong {
@@ -74,63 +76,90 @@
         .kebaikan { background: linear-gradient(to top, #00b894, #55efc4); }
         .keburukan { background: linear-gradient(to top, #d63031, #ff7675); }
 
-        /* CASTLE PUZZLE */
+        /* CASTLE PUZZLE - RESPONSIVE SIZE */
+        .castle-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            order: 1; /* Puzzle di tengah pada desktop */
+            width: 100%;
+            max-width: 500px;
+        }
+
         #castle-frame {
             position: relative;
-            width: 500px;
-            height: 280px;
-            border-radius: 20px;
+            width: 100%;
+            aspect-ratio: 500 / 280; /* Menjaga rasio foto */
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,105,92,0.15);
+            box-shadow: 0 10px 30px rgba(0,105,92,0.15);
             background: #cfd8dc;
-            border: 8px solid white;
+            border: 5px solid white;
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 2px;
+            gap: 1px;
         }
 
         .puzzle-piece {
             width: 100%; height: 100%;
             background-image: url('castle.png');
-            background-size: 500px 280px;
+            background-size: 500% 300%; /* Menyesuaikan grid 5x3 */
             filter: grayscale(100%);
             opacity: 0.3;
             transition: all 0.5s ease;
         }
+
+        /* Logic penempatan background yang dinamis untuk tiap kepingan */
+        .puzzle-piece:nth-child(1) { background-position: 0% 0%; }
+        .puzzle-piece:nth-child(2) { background-position: 25% 0%; }
+        .puzzle-piece:nth-child(3) { background-position: 50% 0%; }
+        .puzzle-piece:nth-child(4) { background-position: 75% 0%; }
+        .puzzle-piece:nth-child(5) { background-position: 100% 0%; }
+        .puzzle-piece:nth-child(6) { background-position: 0% 50%; }
+        .puzzle-piece:nth-child(7) { background-position: 25% 50%; }
+        .puzzle-piece:nth-child(8) { background-position: 50% 50%; }
+        .puzzle-piece:nth-child(9) { background-position: 75% 50%; }
+        .puzzle-piece:nth-child(10) { background-position: 100% 50%; }
+        .puzzle-piece:nth-child(11) { background-position: 0% 100%; }
+        .puzzle-piece:nth-child(12) { background-position: 25% 100%; }
+        .puzzle-piece:nth-child(13) { background-position: 50% 100%; }
+        .puzzle-piece:nth-child(14) { background-position: 75% 100%; }
+        .puzzle-piece:nth-child(15) { background-position: 100% 100%; }
 
         .piece-active { filter: grayscale(0%); opacity: 1; }
 
         /* QUESTION BOX */
         #question-box {
             background: white;
-            padding: 20px;
-            border-radius: 25px;
+            padding: 15px;
+            border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             border: 2px solid #e0f2f1;
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
             margin-top: 15px;
+            box-sizing: border-box;
         }
 
         #question-text {
-            font-size: 1.6rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #263238;
         }
 
         .btn-group {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
         }
 
         .btn-choice {
-            padding: 15px 30px;
-            font-size: 1.3rem;
+            padding: 12px 20px;
+            font-size: 1rem;
             border: none;
-            border-radius: 15px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s;
             color: white;
@@ -140,28 +169,47 @@
             box-shadow: 0 4px 0px #004d40;
         }
 
-        .btn-choice:active { transform: translateY(4px); box-shadow: none; }
+        .btn-choice:active { transform: translateY(2px); box-shadow: none; }
 
-        #progress-bar-container { width: 500px; height: 15px; background: #cfd8dc; border-radius: 10px; margin: 10px 0; }
+        #progress-bar-container { width: 100%; max-width: 500px; height: 12px; background: #cfd8dc; border-radius: 10px; margin: 10px 0; }
         #progress-bar { width: 0%; height: 100%; background: #00b894; border-radius: 10px; transition: width 0.5s; }
 
         .overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 100; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; padding: 20px;
+            text-align: center; padding: 20px; box-sizing: border-box;
         }
 
         #win-overlay { background: rgba(0, 105, 92, 0.95); color: white; }
         #fail-overlay { background: rgba(214, 48, 49, 0.95); color: white; }
-        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 200; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        
+        #start-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: white; z-index: 200; display: flex; 
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px; box-sizing: border-box;
+        }
+
+        /* MEDIA QUERY UNTUK HP */
+        @media (max-width: 600px) {
+            .game-layout { gap: 10px; }
+            .kantong { width: 50px; height: 100px; }
+            .kantong-container span { font-size: 0.8rem; }
+            #question-text { font-size: 1rem; }
+            .btn-choice { font-size: 0.9rem; padding: 10px 15px; }
+            h1 { font-size: 1.5rem; }
+            .castle-wrapper { order: -1; } /* Di HP, puzzle muncul paling atas */
+            .overlay h2 { font-size: 2rem !important; }
+            .overlay p { font-size: 1.2rem !important; }
+        }
     </style>
 </head>
 <body>
 
 <div id="start-screen">
-    <h1 style="font-size: 3rem;">✨ Bismillah... ✨</h1>
-    <p style="font-size: 1.5rem; color: #555;">Mari Membangun Istana di Surga</p>
-    <button onclick="startGame()" style="background: #00796b; padding: 20px 60px; font-size: 1.8rem; border: none; color: white; border-radius: 50px; cursor: pointer;">MULAI BERMAIN</button>
+    <h1 style="font-size: 2.5rem;">✨ Bismillah... ✨</h1>
+    <p style="font-size: 1.2rem; color: #555;">Mari Membangun Istana di Surga</p>
+    <button onclick="startGame()" style="background: #00796b; padding: 15px 40px; font-size: 1.4rem; border: none; color: white; border-radius: 50px; cursor: pointer;">MULAI BERMAIN</button>
 </div>
 
 <div id="game-container">
@@ -173,10 +221,10 @@
             <span style="font-weight: bold; color: var(--success);">Kebaikan</span>
         </div>
 
-        <div style="display: flex; flex-direction: column; align-items: center;">
+        <div class="castle-wrapper">
             <div id="castle-frame"></div>
             <div id="progress-bar-container"><div id="progress-bar"></div></div>
-            <p style="font-size: 1.2rem; font-weight: bold; color: #00796b; margin: 5px 0;">Progres: <span id="score-text">0</span> / 15</p>
+            <p style="font-size: 1rem; font-weight: bold; color: #00796b; margin: 5px 0;">Progres: <span id="score-text">0</span> / 15</p>
         </div>
 
         <div class="kantong-container">
@@ -195,15 +243,15 @@
 </div>
 
 <div id="win-overlay" class="overlay">
-    <h2 style="font-size: 4rem;">Masha Allah! 🎉</h2>
-    <p style="font-size: 2rem;">Alhamdulillah, istanamu di surga sudah jadi!</p>
-    <button onclick="location.reload()" style="background: white; color: #00695c; padding: 15px 40px; border: none; border-radius: 30px; margin-top: 30px; cursor: pointer;">MAIN LAGI</button>
+    <h2 style="font-size: 3rem;">Masha Allah! 🎉</h2>
+    <p style="font-size: 1.5rem;">Alhamdulillah, istanamu di surga sudah jadi!</p>
+    <button onclick="location.reload()" style="background: white; color: #00695c; padding: 12px 30px; border: none; border-radius: 30px; margin-top: 20px; cursor: pointer; font-weight: bold;">MAIN LAGI</button>
 </div>
 
 <div id="fail-overlay" class="overlay">
-    <h2 style="font-size: 4rem;">Ayo Semangat! 💪</h2>
-    <p style="font-size: 2rem;">Jangan menyerah, ayo kumpulkan kebaikan lagi!</p>
-    <button onclick="location.reload()" style="background: white; color: #d63031; padding: 15px 40px; border: none; border-radius: 30px; margin-top: 30px; cursor: pointer;">COBA LAGI</button>
+    <h2 style="font-size: 3rem;">Ayo Semangat! 💪</h2>
+    <p style="font-size: 1.5rem;">Jangan menyerah, ayo kumpulkan kebaikan lagi!</p>
+    <button onclick="location.reload()" style="background: white; color: #d63031; padding: 12px 30px; border: none; border-radius: 30px; margin-top: 20px; cursor: pointer; font-weight: bold;">COBA LAGI</button>
 </div>
 
 <audio id="bgMusic" loop><source src="bg-sound.mp3" type="audio/mpeg"></audio>
@@ -212,7 +260,6 @@
 <audio id="sfxWin"><source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
 
 <script>
-    // DATA PERTANYAAN BARU
     const questions = [
         { q: "Mana perilaku yang dicintai Allah?", a: "Membantu Ayah dan Ibu", b: "Malas-malasan di rumah", correct: "A" },
         { q: "Jika melihat teman terjatuh, kita sebaiknya...", a: "Menertawakannya", b: "Menolongnya berdiri", correct: "B" },
@@ -242,13 +289,11 @@
 
     function createPuzzle() {
         const frame = document.getElementById('castle-frame');
+        frame.innerHTML = ""; // Bersihkan frame
         for (let i = 0; i < 15; i++) {
             const piece = document.createElement('div');
             piece.className = 'puzzle-piece';
             piece.id = `piece-${i}`;
-            const x = (i % 5) * (500 / 5);
-            const y = Math.floor(i / 5) * (280 / 3);
-            piece.style.backgroundPosition = `-${x}px -${y}px`;
             frame.appendChild(piece);
         }
     }
@@ -286,7 +331,7 @@
             if(score > 0) score--;
             
             const frame = document.getElementById('castle-frame');
-            frame.style.transform = "translateX(10px)";
+            frame.style.transform = "translateX(5px)";
             setTimeout(() => frame.style.transform = "translateX(0)", 100);
         }
 
@@ -301,17 +346,15 @@
     }
 
     function updateVisuals() {
-        // Update Puzzle & Progress Bar
         const percentage = (score / 15) * 100;
         document.getElementById('progress-bar').style.width = percentage + "%";
         document.getElementById('score-text').innerText = score;
         
         for (let i = 0; i < 15; i++) {
             const piece = document.getElementById(`piece-${i}`);
-            piece.classList.toggle('piece-active', i < score);
+            if(piece) piece.classList.toggle('piece-active', i < score);
         }
 
-        // UPDATE KANTONG (Logic Persentase)
         const baikPercent = (score / 15) * 100;
         const burukPercent = (wrongCount / 15) * 100;
         document.getElementById('isi-baik').style.height = baikPercent + "%";
@@ -328,7 +371,7 @@
         }
     }
 </script>
-<footer style="text-align: center; margin-top: 10px; color: #666; font-size: 0.8rem;">
+<footer style="text-align: center; padding: 20px 0; color: #666; font-size: 0.7rem; width: 100%;">
     <span>by : Alfian Riyanto Aditia Famungkas . 2026</span>
 </footer>
 </body>

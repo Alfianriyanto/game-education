@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Membangun Istana di Surga - Puzzle Version</title>
+    <style>
+        :root {
+            --primary: #2d3436;
+            --accent: #fdcb6e;
+            --success: #00b894;
+            --danger: #d63031;
+            --bg: #f9f9f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 95%;
+            max-width: 1100px;
+            text-align: center;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { color: #00695c; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); font-size: 2rem; margin: 5px 0; }
+
+        /* KANTONG LOGIC */
+        .game-layout {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .kantong-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .kantong {
+            width: 80px;
+            height: 200px;
+            border: 4px solid #fff;
+            border-radius: 0 0 40px 40px;
+            position: relative;
+            background: rgba(255,255,255,0.3);
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .isi-kantong {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            transition: height 0.5s ease;
+        }
+
+        .kebaikan { background: linear-gradient(to top, #00b894, #55efc4); }
+        .keburukan { background: linear-gradient(to top, #d63031, #ff7675); }
+
+        /* CASTLE PUZZLE */
+        #castle-frame {
+            position: relative;
+            width: 500px;
+            height: 280px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,105,92,0.15);
+            background: #cfd8dc;
+            border: 8px solid white;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 2px;
+        }
+
+        .puzzle-piece {
+            width: 100%; height: 100%;
+            background-image: url('castle.png');
+            background-size: 500px 280px;
+            filter: grayscale(100%);
+            opacity: 0.3;
+            transition: all 0.5s ease;
+        }
+
+        .piece-active { filter: grayscale(0%); opacity: 1; }
+
+        /* QUESTION BOX */
+        #question-box {
+            background: white;
+            padding: 20px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 2px solid #e0f2f1;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 15px;
+        }
+
+        #question-text {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #263238;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn-choice {
+            padding: 15px 30px;
+            font-size: 1.3rem;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+            font-weight: 500;
+            text-align: left;
+            background-color: #00796b;
+            box-shadow: 0 4px 0px #004d40;
+        }
+
+        .btn-choice:active { transform: translateY(4px); box-shadow: none; }
+
+        #progress-bar-container { width: 500px; height: 15px; background: #cfd8dc; border-radius: 10px; margin: 10px 0; }
+        #progress-bar { width: 0%; height: 100%; background: #00b894; border-radius: 10px; transition: width 0.5s; }
+
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 100; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px;
+        }
+
+        #win-overlay { background: rgba(0, 105, 92, 0.95); color: white; }
+        #fail-overlay { background: rgba(214, 48, 49, 0.95); color: white; }
+        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 200; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+
+<div id="start-screen">
+    <h1 style="font-size: 3rem;">✨ Bismillah... ✨</h1>
+    <p style="font-size: 1.5rem; color: #555;">Mari Membangun Istana di Surga</p>
+    <button onclick="startGame()" style="background: #00796b; padding: 20px 60px; font-size: 1.8rem; border: none; color: white; border-radius: 50px; cursor: pointer;">MULAI BERMAIN</button>
+</div>
+
+<div id="game-container">
+    <h1>🕌 Istanaku di Surga</h1>
+    
+    <div class="game-layout">
+        <div class="kantong-container">
+            <div class="kantong"><div id="isi-baik" class="isi-kantong kebaikan"></div></div>
+            <span style="font-weight: bold; color: var(--success);">Kebaikan</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div id="castle-frame"></div>
+            <div id="progress-bar-container"><div id="progress-bar"></div></div>
+            <p style="font-size: 1.2rem; font-weight: bold; color: #00796b; margin: 5px 0;">Progres: <span id="score-text">0</span> / 15</p>
+        </div>
+
+        <div class="kantong-container">
+            <div class="kantong"><div id="isi-buruk" class="isi-kantong keburukan"></div></div>
+            <span style="font-weight: bold; color: var(--danger);">Keburukan</span>
+        </div>
+    </div>
+
+    <div id="question-box">
+        <div id="question-text">Memuat Pertanyaan...</div>
+        <div class="btn-group">
+            <button class="btn-choice" onclick="checkAnswer('A')">A. <span id="text-a"></span></button>
+            <button class="btn-choice" onclick="checkAnswer('B')">B. <span id="text-b"></span></button>
+        </div>
+    </div>
+</div>
+
+<div id="win-overlay" class="overlay">
+    <h2 style="font-size: 4rem;">Masha Allah! 🎉</h2>
+    <p style="font-size: 2rem;">Alhamdulillah, istanamu di surga sudah jadi!</p>
+    <button onclick="location.reload()" style="background: white; color: #00695c; padding: 15px 40px; border: none; border-radius: 30px; margin-top: 30px; cursor: pointer;">MAIN LAGI</button>
+</div>
+
+<div id="fail-overlay" class="overlay">
+    <h2 style="font-size: 4rem;">Ayo Semangat! 💪</h2>
+    <p style="font-size: 2rem;">Jangan menyerah, ayo kumpulkan kebaikan lagi!</p>
+    <button onclick="location.reload()" style="background: white; color: #d63031; padding: 15px 40px; border: none; border-radius: 30px; margin-top: 30px; cursor: pointer;">COBA LAGI</button>
+</div>
+
+<audio id="bgMusic" loop><source src="bg-sound.mp3" type="audio/mpeg"></audio>
+<audio id="sfxCorrect"><source src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+<audio id="sfxWrong"><source src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+<audio id="sfxWin"><source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+
+<script>
+    // DATA PERTANYAAN BARU
+    const questions = [
+        { q: "Mana perilaku yang dicintai Allah?", a: "Membantu Ayah dan Ibu", b: "Malas-malasan di rumah", correct: "A" },
+        { q: "Jika melihat teman terjatuh, kita sebaiknya...", a: "Menertawakannya", b: "Menolongnya berdiri", correct: "B" },
+        { q: "Sebelum makan, hal baik yang dilakukan adalah...", a: "Mencuci tangan dan berdoa", b: "Langsung makan sambil lari", correct: "A" },
+        { q: "Berbicara kepada orang tua harus...", a: "Berteriak keras", b: "Lemah lembut dan sopan", correct: "B" },
+        { q: "Saat meminjam barang teman, kita harus...", a: "Meminta izin dulu", b: "Mengambil diam-diam", correct: "A" },
+        { q: "Jika berbuat salah, anak hebat akan...", a: "Meminta maaf", b: "Menyalahkan orang lain", correct: "A" },
+        { q: "Merapikan mainan setelah bermain adalah perbuatan...", a: "Buruk", b: "Terpuji", correct: "B" },
+        { q: "Mendengar adzan berkumandang, kita segera...", a: "Terus bermain game", b: "Bersiap untuk sholat", correct: "B" },
+        { q: "Membuang sampah sebaiknya di...", a: "Tempat sampah", b: "Halaman sekolah", correct: "A" },
+        { q: "Menyapa guru saat bertemu adalah tanda anak...", a: "Sopan", b: "Sombong", correct: "A" },
+        { q: "Saat teman berbagi makanan, kita ucapkan...", a: "Terima kasih", b: "Langsung ambil saja", correct: "A" },
+        { q: "Melihat tanaman kering, kita sebaiknya...", a: "Menyiramnya", b: "Memetik daunnya", correct: "A" },
+        { q: "Bangun tidur pagi hari adalah kebiasaan...", a: "Anak malas", b: "Anak sholeh", correct: "B" },
+        { q: "Menabung uang saku adalah perbuatan...", a: "Hemat dan baik", b: "Pelit dan buruk", correct: "A" },
+        { q: "Belajar dengan rajin dilakukan agar...", a: "Dipuji saja", b: "Pandai dan bermanfaat", correct: "B" }
+    ];
+
+    let currentStep = 0;
+    let score = 0;
+    let wrongCount = 0;
+
+    const bgMusic = document.getElementById('bgMusic');
+    const sfxCorrect = document.getElementById('sfxCorrect');
+    const sfxWrong = document.getElementById('sfxWrong');
+    const sfxWin = document.getElementById('sfxWin');
+
+    function createPuzzle() {
+        const frame = document.getElementById('castle-frame');
+        for (let i = 0; i < 15; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'puzzle-piece';
+            piece.id = `piece-${i}`;
+            const x = (i % 5) * (500 / 5);
+            const y = Math.floor(i / 5) * (280 / 3);
+            piece.style.backgroundPosition = `-${x}px -${y}px`;
+            frame.appendChild(piece);
+        }
+    }
+
+    function startGame() {
+        createPuzzle();
+        document.getElementById('start-screen').style.display = 'none';
+        bgMusic.volume = 0.2;
+        bgMusic.play().catch(e => console.log("Audio play deferred"));
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (currentStep < questions.length) {
+            const current = questions[currentStep];
+            document.getElementById('question-text').innerText = current.q;
+            document.getElementById('text-a').innerText = current.a;
+            document.getElementById('text-b').innerText = current.b;
+        } else {
+            finishGame();
+        }
+    }
+
+    function checkAnswer(userAnswer) {
+        const isCorrect = (userAnswer === questions[currentStep].correct);
+
+        if (isCorrect) {
+            sfxCorrect.currentTime = 0;
+            sfxCorrect.play();
+            score++;
+        } else {
+            sfxWrong.currentTime = 0;
+            sfxWrong.play();
+            wrongCount++;
+            if(score > 0) score--;
+            
+            const frame = document.getElementById('castle-frame');
+            frame.style.transform = "translateX(10px)";
+            setTimeout(() => frame.style.transform = "translateX(0)", 100);
+        }
+
+        updateVisuals();
+        currentStep++;
+        
+        if (currentStep < questions.length) {
+            setTimeout(loadQuestion, 600);
+        } else {
+            setTimeout(finishGame, 800);
+        }
+    }
+
+    function updateVisuals() {
+        // Update Puzzle & Progress Bar
+        const percentage = (score / 15) * 100;
+        document.getElementById('progress-bar').style.width = percentage + "%";
+        document.getElementById('score-text').innerText = score;
+        
+        for (let i = 0; i < 15; i++) {
+            const piece = document.getElementById(`piece-${i}`);
+            piece.classList.toggle('piece-active', i < score);
+        }
+
+        // UPDATE KANTONG (Logic Persentase)
+        const baikPercent = (score / 15) * 100;
+        const burukPercent = (wrongCount / 15) * 100;
+        document.getElementById('isi-baik').style.height = baikPercent + "%";
+        document.getElementById('isi-buruk').style.height = burukPercent + "%";
+    }
+
+    function finishGame() {
+        bgMusic.pause();
+        if(score >= 15) {
+            sfxWin.play();
+            document.getElementById('win-overlay').style.display = 'flex';
+        } else {
+            document.getElementById('fail-overlay').style.display = 'flex';
+        }
+    }
+</script>
+<footer style="text-align: center; margin-top: 10px; color: #666; font-size: 0.8rem;">
+    <span>by : Alfian Riyanto Aditia Famungkas . 2026</span>
+</footer>
+</body>
+</html>
